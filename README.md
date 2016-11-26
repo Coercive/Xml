@@ -101,7 +101,7 @@ use \Coercive\Utility\Xml\FormatML;
 # Load ML Format
 $oFormatML = new FormatML($aTitle);
 
-# Add format options
+# You can add some format options
 $oFormatML = new FormatML($aTitle, [
     'bold' => '<b>' . FormatML::CONTENT . '</b>',
     'italic' => '<i>' . FormatML::CONTENT . '</i>',
