@@ -7,9 +7,9 @@ use \Exception;
  * ExtractArray
  * PHP Version 	7
  *
- * @version		1
+ * @version	1
  * @package 	Coercive\Utility\Xml
- * @link		@link https://github.com/Coercive/Xml
+ * @link	@link https://github.com/Coercive/Xml
  *
  * @author  	Anthony Moral <contact@coercive.fr>
  * @copyright   (c) 2016 - 2017 Anthony Moral
@@ -22,8 +22,8 @@ class ExtractArray {
 	const ROOT_DELIMITER = 'ROOT_DELIMITER';
 	const ROOT_REQUIRED = 'ROOT_REQUIRED';
 
-    /** @var array */
-    private $_aOptions;
+	/** @var array */
+	private $_aOptions;
 
 	/** @var array */
 	private $_aSourceArray;
@@ -32,13 +32,18 @@ class ExtractArray {
 	private $_aRootArray;
 
 	/** @var array */
-	private $_aProcessArray;
+	private $_aProcessArray = [];
+
+	/** @var array */
+	private $_aResultsArray = [];
 
 	/** @var array */
 	private $_aRootPath;
 
 	/** @var bool */
 	private $_bFoundRecurse;
+	private $_bGetAll;
+	private $_bFoundOne;
 
 	/**
 	 * EXCEPTION
@@ -163,26 +168,63 @@ class ExtractArray {
 	 * /!\ Array of Arrays [ [], [], [] ... ] or string if uniq element
 	 *
 	 * @param string $sKey [optional]
+	 * @param bool $bAll [optional]
 	 * @return array|mixed
 	 */
-	public function get($sKey = null) {
+	public function get($sKey = null, $bAll = false) {
+
+		# INIT
+		$this->_bGetAll = $bAll;
+		$this->_bFoundOne = false;
+		$this->_aResultsArray = [];
 
 		# SKIP
-		if(!$this->_aProcessArray) { return []; }
-		if(!is_array($this->_aProcessArray)) { return $this->_aProcessArray; }
+		if(!$this->_aProcessArray || !is_array($this->_aProcessArray)) { return $this->_aProcessArray; }
 
 		# NULL
 		if(null === $sKey) { return $this->_aProcessArray; }
 
-		# UNSET-PARSE
-		$aResult = [];
-		foreach($this->_aProcessArray as $mCurrentKey => $mValue) {
-			if(is_array($mValue) && array_key_exists($sKey, $mValue)) {
-				unset($this->_aProcessArray[$mCurrentKey]);
-				$aResult[] = $mValue[$sKey];
+		# RECURSE SEARCH
+		$this->_aProcessArray = $this->_recurseGet($this->_aProcessArray, $sKey);
+		return $this->_aResultsArray;
+
+	}
+
+	/**
+	 * RECURSIVE GETTER
+	 *
+	 * @param array $aArray
+	 * @param string $sKey
+	 * @return array
+	 */
+	private function _recurseGet($aArray, $sKey) {
+
+		# SKIP
+		if(!$aArray || !is_array($aArray)) { return $aArray; }
+
+		# RECURSIVE Search
+		foreach($aArray as $mCurrentKey => $mValue) {
+
+			# FOUND CURRENT KEY
+			if($sKey === (string) $mCurrentKey) {
+				unset($aArray[$mCurrentKey]);
+				$this->_aResultsArray[] = $mValue;
+				$this->_bFoundOne = true;
+				if(!$this->_bGetAll) { return $aArray; }
+				continue;
 			}
+
+			# RECURSIF LAUNCH
+			if(is_array($mValue)) {
+				$aArray[$mCurrentKey] = $this->_recurseGet($mValue, $sKey);
+				if(!$this->_bGetAll && $this->_bFoundOne) { return $aArray; }
+			}
+
+			if(empty($aArray[$mCurrentKey])) { unset($aArray[$mCurrentKey]); }
+
 		}
-		return $aResult;
+
+		return $aArray;
 
 	}
 
