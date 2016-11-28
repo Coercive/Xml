@@ -49,7 +49,21 @@ class FormatML {
         throw new Exception("$sMessage \nMethod :  $sMethod \nLine : $sLine");
     }
 
-    /**
+	/**
+	 * TO STRING
+	 *
+	 * @return string
+	 */
+    public function __toString() {
+		try {
+			return $this->get();
+		}
+		catch (Exception $e) {
+			return '';
+		}
+	}
+
+	/**
      * FormatML constructor.
      *
      * @param array $aArray
