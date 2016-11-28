@@ -168,7 +168,7 @@ class ExtractArray {
 	public function get($sKey = null) {
 
 		# SKIP
-		if(empty($this->_aProcessArray) || !is_array($this->_aProcessArray)) { return []; }
+		if(!$this->_aProcessArray) { return []; }
 		if(!is_array($this->_aProcessArray)) { return $this->_aProcessArray; }
 
 		# NULL
