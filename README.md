@@ -90,6 +90,15 @@ $oExtractArray = new ExtractArray($aXml, [
 $aTitle = $oExtractArray->get('title');
 $aAuthors = $oExtractArray->get('authors');
 $aArticle = $oExtractArray->get(); /* take all others */
+
+# You have two extraction options :
+
+# Get all elements
+$aListAll = $oExtractArray->get('example', true);
+
+# Get all elements at the foreground of setted root
+$aListAllForeground = $oExtractArray->get('example', true, true); 
+
 ```
 FormatML
 ```php
