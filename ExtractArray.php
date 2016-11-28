@@ -44,6 +44,7 @@ class ExtractArray {
 	private $_bFoundRecurse;
 	private $_bGetAll;
 	private $_bFoundOne;
+	private $_bForeground;
 
 	/**
 	 * EXCEPTION
@@ -169,12 +170,14 @@ class ExtractArray {
 	 *
 	 * @param string $sKey [optional]
 	 * @param bool $bAll [optional]
+	 * @param bool $bForeground [optional]
 	 * @return array|mixed
 	 */
-	public function get($sKey = null, $bAll = false) {
+	public function get($sKey = null, $bAll = false, $bForeground = false) {
 
 		# INIT
 		$this->_bGetAll = $bAll;
+		$this->_bForeground = $bForeground;
 		$this->_bFoundOne = false;
 		$this->_aResultsArray = [];
 
@@ -215,7 +218,7 @@ class ExtractArray {
 			}
 
 			# RECURSIF LAUNCH
-			if(is_array($mValue)) {
+			if(!$this->_bForeground && is_array($mValue)) {
 				$aArray[$mCurrentKey] = $this->_recurseGet($mValue, $sKey);
 				if(!$this->_bGetAll && $this->_bFoundOne) { return $aArray; }
 			}
