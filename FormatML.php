@@ -72,9 +72,12 @@ class FormatML {
      */
     public function __construct($aArray, $aFormatDirectives = [], $aOptions = []) {
 
-        if(!$aArray || !is_array($aArray)) {
-            self::_exception("NOT A VALID SOURCE ARRAY OR EMPTY", __LINE__, __METHOD__);
+	if(!$aArray) {
+            self::_exception("EMPTY SOURCE ARRAY", __LINE__, __METHOD__);
         }
+	if(!is_array($aArray)) {
+	    $aArray = (array) $aArray;
+	}
         $this->_aSourceArray = $aArray;
 
         if(!is_array($aFormatDirectives)) {
