@@ -28,12 +28,6 @@ class FormatML {
     /** @var array */
     private $_aFormatDirectives;
 
-    /** @var int */
-    private $_iAttributes = 0;
-
-    /** @var array */
-    private $_aAttributes = [];
-
     /** @var string */
     private $_sOutputString = '';
 
@@ -117,13 +111,16 @@ class FormatML {
         if(empty($aArray)) { return ''; }
 
         # PROCESSING
+	$iAttribute = 0;
+	$aAttributes = [];
         foreach($aArray as $mKey => $mItem) {
 
             # ATTRIBUTES PREPARE
-            if($mKey === '@attributes') {
-                $this->_iAttributes++;
-                $this->_aAttributes[$this->_iAttributes] = $mItem;
-                continue;
+	    if($mKey === '@attributes') { continue; }
+            if(isset($mItem['@attributes'])) {
+	            $iAttribute++;
+	            $aAttributes[$iAttribute] = $mItem['@attributes'];
+	            unset($mItem['@attributes']);
             }
 
             # CONTENT
@@ -156,7 +153,7 @@ class FormatML {
                         break;
 
                     case 'object':
-                        $sOutputString = $mDirective($sOutputString, $this->_iAttributes ? $this->_aAttributes[$this->_iAttributes] : []);
+                        $sOutputString = $mDirective($sOutputString, $iAttribute ? $aAttributes[$iAttribute] : []);
                         break;
 
                     default:
