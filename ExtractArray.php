@@ -223,8 +223,6 @@ class ExtractArray {
 				if(!$this->_bGetAll && $this->_bFoundOne) { return $aArray; }
 			}
 
-			if(empty($aArray[$mCurrentKey])) { unset($aArray[$mCurrentKey]); }
-
 		}
 
 		return $aArray;
