@@ -122,26 +122,28 @@ class XmlCleaner {
 
         # DELETE PARASITIC
         $this->_deleteParasitic();
-		
+	
 	# DELETE WHITE SPACE
-	$this->_whiteSpace();
+	$this->_deleteWhiteSpace();
+	
+	# DELETE TAB
+	$this->_deleteTabulate();
+
+	# DELETE LINE FEED
+	$this->_deleteLineFeed();
+
+	# DELETE CARRIAGE RETURN
+	$this->_deleteCarriageReturn();
+
+	# DELETE NULL BYTE
+	$this->_deleteNullByte();
+
+	# DELETE VERTICAL TAB
+	$this->_deleteVerticalTab();
 
         return $this;
 
     }
-	
-	/**
-	 * WHITE SPACE
-	 *
-	 * @return void
-	 */
-	private function _whiteSpace() {
-
-		while(strpos($this->_sXML, '  ') !== false) {
-			$this->_sXML = str_replace('  ', ' ', $this->_sXML);
-		}
-
-	}
 
 	/**
 	 * DECODE GLOBAL & SPECIFIC
@@ -192,5 +194,73 @@ class XmlCleaner {
         }
 
     }
+	
+	/**
+	 * WHITE SPACE
+	 *
+	 * @return void
+	 */
+	private function _deleteWhiteSpace() {
+
+		while(strpos($this->_sXML, '  ') !== false) {
+			$this->_sXML = str_replace('  ', ' ', $this->_sXML);
+		}
+
+	}
+	
+	/**
+	 * TABULATE
+	 *
+	 * @return void
+	 */
+	private function _deleteTabulate() {
+
+		$this->_sXML = str_replace("\t", '', $this->_sXML);
+
+	}
+
+	/**
+	 * LINE
+	 *
+	 * @return void
+	 */
+	private function _deleteLineFeed() {
+
+		$this->_sXML = str_replace("\n", '', $this->_sXML);
+
+	}
+
+	/**
+	 * CARRIAGE
+	 *
+	 * @return void
+	 */
+	private function _deleteCarriageReturn() {
+
+		$this->_sXML = str_replace("\r", '', $this->_sXML);
+
+	}
+
+	/**
+	 * NULL BYTE
+	 *
+	 * @return void
+	 */
+	private function _deleteNullByte() {
+
+		$this->_sXML = str_replace("\0", '', $this->_sXML);
+
+	}
+
+	/**
+	 * VERTICAL TAB
+	 *
+	 * @return void
+	 */
+	private function _deleteVerticalTab() {
+
+		$this->_sXML = str_replace("\x0B", '', $this->_sXML);
+
+	}
 
 }
