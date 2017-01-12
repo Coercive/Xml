@@ -122,10 +122,26 @@ class XmlCleaner {
 
         # DELETE PARASITIC
         $this->_deleteParasitic();
+		
+	# DELETE WHITE SPACE
+	$this->_whiteSpace();
 
         return $this;
 
     }
+	
+	/**
+	 * WHITE SPACE
+	 *
+	 * @return void
+	 */
+	private function _whiteSpace() {
+
+		while(strpos($this->_sXML, '  ') !== false) {
+			$this->_sXML = str_replace('  ', ' ', $this->_sXML);
+		}
+
+	}
 
 	/**
 	 * DECODE GLOBAL & SPECIFIC
