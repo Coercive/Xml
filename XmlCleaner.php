@@ -9,7 +9,7 @@ use \Exception;
  *
  * @version		1
  * @package 	Coercive\Utility\Xml
- * @link		@link https://github.com/Coercive/Xml
+ * @link	https://github.com/Coercive/Xml
  *
  * @author  	Anthony Moral <contact@coercive.fr>
  * @copyright   (c) 2016 - 2017 Anthony Moral
