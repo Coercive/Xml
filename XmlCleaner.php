@@ -1,7 +1,7 @@
 <?php
 namespace Coercive\Utility\Xml;
 
-use \Exception;
+use Exception;
 
 /**
  * XmlCleaner
@@ -9,7 +9,7 @@ use \Exception;
  *
  * @version		1
  * @package 	Coercive\Utility\Xml
- * @link	https://github.com/Coercive/Xml
+ * @link		https://github.com/Coercive/Xml
  *
  * @author  	Anthony Moral <contact@coercive.fr>
  * @copyright   (c) 2016 - 2017 Anthony Moral
@@ -17,10 +17,11 @@ use \Exception;
  */
 class XmlCleaner {
 
-    # CLASS OPTIONS
-    const OPTION_DECODE = 'DECODE';
-    const OPTION_DELETE_DOCTYPE = 'DELETE_DOCTYPE';
-    const OPTION_DELETE_PARASITIC = 'DELETE_DELETE_PARASITIC';
+	# CLASS OPTIONS
+	const OPTION_DECODE = 'DECODE';
+	const OPTION_ENCODE_LOST_CHEVRON = 'OPTION_ENCODE_LOST_CHEVRON';
+	const OPTION_DELETE_DOCTYPE = 'DELETE_DOCTYPE';
+	const OPTION_DELETE_PARASITIC = 'DELETE_DELETE_PARASITIC';
 
 	/** @var array */
 	private $_aOptions;
@@ -49,34 +50,35 @@ class XmlCleaner {
 
 		$this->_aOptions = array_replace_recursive([
 			self::OPTION_DECODE => [ ['&', '&amp;'] ],
-            self::OPTION_DELETE_DOCTYPE => true,
-            self::OPTION_DELETE_PARASITIC => true
+			self::OPTION_ENCODE_LOST_CHEVRON => true,
+			self::OPTION_DELETE_DOCTYPE => true,
+			self::OPTION_DELETE_PARASITIC => true
 		], $aOptions);
 
 	}
 
-    /**
-     * GET XML CLEANED STRING
-     *
-     * @return string
-     */
+	/**
+	 * GET XML CLEANED STRING
+	 *
+	 * @return string
+	 */
 	public function get() {
-	    return $this->_sXML ?: '';
-    }
+		return $this->_sXML ?: '';
+	}
 
 	/**
 	 * FILE LOADER
 	 *
 	 * @param string $sXmlPath
-     * @return $this
+	 * @return XmlCleaner
 	 * @throws Exception
 	 */
 	public function loadFile($sXmlPath) {
 
-	    # SKIP ON ERROR
-        if(!file_exists($sXmlPath) || !is_file($sXmlPath)) {
-            self::_exception("NOT A VALID FILE : $sXmlPath", __LINE__, __METHOD__);
-        }
+		# SKIP ON ERROR
+		if(!file_exists($sXmlPath) || !is_file($sXmlPath)) {
+			self::_exception("NOT A VALID FILE : $sXmlPath", __LINE__, __METHOD__);
+		}
 
 		# SET
 		$this->_sXML = file_get_contents($sXmlPath);
@@ -86,69 +88,72 @@ class XmlCleaner {
 
 	}
 
-    /**
-     * FILE LOADER
-     *
-     * @param string $sXmlString
-     * @return $this
-     * @throws Exception
-     */
-    public function loadString($sXmlString) {
+	/**
+	 * FILE LOADER
+	 *
+	 * @param string $sXmlString
+	 * @return XmlCleaner
+	 * @throws Exception
+	 */
+	public function loadString($sXmlString) {
 
-        # SKIP ON ERROR
-        if(!$sXmlString || !is_string($sXmlString)) {
-            self::_exception("NOT A VALID STRING OR EMPTY", __LINE__, __METHOD__);
-        }
+		# SKIP ON ERROR
+		if(!$sXmlString || !is_string($sXmlString)) {
+			self::_exception("NOT A VALID STRING OR EMPTY", __LINE__, __METHOD__);
+		}
 
-        # SET
-        $this->_sXML = $sXmlString;
+		# SET
+		$this->_sXML = $sXmlString;
 
-        return $this;
+		return $this;
 
-    }
+	}
 
-    /**
-     * CLEAN
-     *
-     * @return $this
-     */
+	/**
+	 * CLEAN
+	 *
+	 * @return XmlCleaner
+	 */
 	public function clean() {
 
-        # DECODE
-        $this->_decode();
+		# DECODE
+		$this->_decode();
 
-        # DELETE DOCTYPE
-        $this->_deleteDoctype();
+		# CHEVRONS
+		$this->_encodeLostChevrons();
 
-        # DELETE PARASITIC
-        $this->_deleteParasitic();
-	
-	# DELETE WHITE SPACE
-	$this->_deleteWhiteSpace();
-	
-	# DELETE TAB
-	$this->_deleteTabulate();
+		# DELETE DOCTYPE
+		$this->_deleteDoctype();
 
-	# DELETE LINE FEED
-	$this->_deleteLineFeed();
+		# DELETE PARASITIC
+		$this->_deleteParasitic();
 
-	# DELETE CARRIAGE RETURN
-	$this->_deleteCarriageReturn();
+		# DELETE WHITE SPACE
+		$this->_deleteWhiteSpace();
 
-	# DELETE NULL BYTE
-	$this->_deleteNullByte();
+		# DELETE TAB
+		$this->_deleteTabulate();
 
-	# DELETE VERTICAL TAB
-	$this->_deleteVerticalTab();
+		# DELETE LINE FEED
+		$this->_deleteLineFeed();
 
-        return $this;
+		# DELETE CARRIAGE RETURN
+		$this->_deleteCarriageReturn();
 
-    }
+		# DELETE NULL BYTE
+		$this->_deleteNullByte();
+
+		# DELETE VERTICAL TAB
+		$this->_deleteVerticalTab();
+
+		return $this;
+
+	}
 
 	/**
 	 * DECODE GLOBAL & SPECIFIC
-     *
-     * @return void
+	 *
+	 * @return void
 	 */
 	private function _decode() {
 
@@ -162,39 +167,67 @@ class XmlCleaner {
 
 	}
 
-    /**
-     * DELETE DOCTYPE
-     *
-     * Delete goods and bads doctype witch can cause some xml-parsing errors
-     * Example : <!DOCTYPE myxml PUBLIC "-//MYXMLEXAMPLE//DTD MYXMLEXAMPLE XML//EN">
-     *
-     * @return void
-     */
-    private function _deleteDoctype() {
+	/**
+	 * ENCODE CHEVRONS
+	 *
+	 * @return void
+	 */
+	private function _encodeLostChevrons() {
 
-        if($this->_aOptions[self::OPTION_DELETE_DOCTYPE]) {
-            $this->_sXML = preg_replace('`\<\!DOCTYPE [^<]*\>`i', '', $this->_sXML);
-        }
+		# ONLY IF ALLOWED
+		if(!$this->_aOptions[self::OPTION_ENCODE_LOST_CHEVRON]) { return; }
 
-    }
+		# HTML ENTITY
+		$this->_sXML = preg_replace_callback(
+			'`\<(?:[^a-z/]|[\s])`',
+			function ($aMatches) {
+				return str_replace('<', '&amp;lt;', $aMatches[0]);
+			},
+			$this->_sXML
+		);
+		$this->_sXML = preg_replace_callback(
+			'`(?:[\s]|[^a-z0-9"\'/])\>`',
+			function ($aMatches) {
+				return str_replace('>', '&amp;gt;', $aMatches[0]);
+			},
+			$this->_sXML
+		);
 
-    /**
-     * DELETE PARASITIC
-     *
-     * Delete parasitics elements witch cause fatal xml-parsing errors
-     * Examples :   <?lettrine;@0302?> ; <?tblwidth;126m?> ; <?bidencadre3;30;37m?> ; <?Pub Caret?>
-     *              <?Pub _bookmark Command="[Quick Mark]"?> ; <?xpp fin_fxapnot?> ; <?xpp error_tag #@@>
-     *
-     * @return void
-     */
-    private function _deleteParasitic() {
+	}
 
-        if($this->_aOptions[self::OPTION_DELETE_PARASITIC]) {
-            $this->_sXML = preg_replace('`\<\?(?!xml)[^<]*\>`i', '', $this->_sXML);
-        }
+	/**
+	 * DELETE DOCTYPE
+	 *
+	 * Delete goods and bads doctype witch can cause some xml-parsing errors
+	 * Example : <!DOCTYPE myxml PUBLIC "-//MYXMLEXAMPLE//DTD MYXMLEXAMPLE XML//EN">
+	 *
+	 * @return void
+	 */
+	private function _deleteDoctype() {
 
-    }
-	
+		if($this->_aOptions[self::OPTION_DELETE_DOCTYPE]) {
+			$this->_sXML = preg_replace('`\<\!DOCTYPE [^<]*\>`i', '', $this->_sXML);
+		}
+
+	}
+
+	/**
+	 * DELETE PARASITIC
+	 *
+	 * Delete parasitics elements witch cause fatal xml-parsing errors
+	 * Examples :   <?lettrine;@0302?> ; <?tblwidth;126m?> ; <?bidencadre3;30;37m?> ; <?Pub Caret?>
+	 *              <?Pub _bookmark Command="[Quick Mark]"?> ; <?xpp fin_fxapnot?> ; <?xpp error_tag #@@>
+	 *
+	 * @return void
+	 */
+	private function _deleteParasitic() {
+
+		if($this->_aOptions[self::OPTION_DELETE_PARASITIC]) {
+			$this->_sXML = preg_replace('`\<\?(?!xml)[^<]*\>`i', '', $this->_sXML);
+		}
+
+	}
+
 	/**
 	 * WHITE SPACE
 	 *
@@ -207,7 +240,7 @@ class XmlCleaner {
 		}
 
 	}
-	
+
 	/**
 	 * TABULATE
 	 *
