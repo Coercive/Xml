@@ -224,6 +224,7 @@ class XmlCleaner {
 
 		if($this->_aOptions[self::OPTION_DELETE_PARASITIC]) {
 			$this->_sXML = preg_replace('`\<\?(?!xml)[^<]*\>`i', '', $this->_sXML);
+			$this->_sXML = preg_replace('`\<\?[^<]*\?\>`i', '', $this->_sXML);
 		}
 
 	}
