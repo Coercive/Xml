@@ -186,7 +186,7 @@ class XmlCleaner {
 			$this->_sXML
 		);
 		$this->_sXML = preg_replace_callback(
-			'`(?:[\s]|[^a-z0-9"\'/\?])\>`',
+			'`(?:[\s]|[^a-z0-9"\'/\?\-])\>`',
 			function ($aMatches) {
 				return str_replace('>', '&amp;gt;', $aMatches[0]);
 			},
