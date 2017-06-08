@@ -179,7 +179,7 @@ class XmlCleaner {
 
 		# HTML ENTITY
 		$this->_sXML = preg_replace_callback(
-			'`\<(?:[^a-z/]|[\s])`',
+			'`\<(?:[^a-z/\?\!]|[\s])`',
 			function ($aMatches) {
 				return str_replace('<', '&amp;lt;', $aMatches[0]);
 			},
