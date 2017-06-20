@@ -217,6 +217,15 @@ class ExtractArray {
 				continue;
 			}
 
+			# FOREGROUND
+			if(is_numeric($mCurrentKey) && $this->_bForeground && is_array($mValue) && isset($mValue[$sKey])) {
+				unset($aArray[$mCurrentKey][$sKey]);
+				$this->_aResultsArray[] = $mValue;
+				$this->_bFoundOne = true;
+				if(!$this->_bGetAll) { return $aArray; }
+				continue;
+			}
+
 			# RECURSIF LAUNCH
 			if(!$this->_bForeground && is_array($mValue)) {
 				$aArray[$mCurrentKey] = $this->_recurseGet($mValue, $sKey);
