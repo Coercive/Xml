@@ -5,14 +5,12 @@ use Exception;
 
 /**
  * XmlCleaner
- * PHP Version 	7
  *
- * @version		1
  * @package 	Coercive\Utility\Xml
  * @link		https://github.com/Coercive/Xml
  *
  * @author  	Anthony Moral <contact@coercive.fr>
- * @copyright   (c) 2016 - 2017 Anthony Moral
+ * @copyright   (c) 2016 - 2018 Anthony Moral
  * @license 	http://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License
  */
 class XmlCleaner {
@@ -22,6 +20,7 @@ class XmlCleaner {
 	const OPTION_ENCODE_LOST_CHEVRON = 'OPTION_ENCODE_LOST_CHEVRON';
 	const OPTION_DELETE_DOCTYPE = 'DELETE_DOCTYPE';
 	const OPTION_DELETE_PARASITIC = 'DELETE_DELETE_PARASITIC';
+	const OPTION_TAGS_CONVERSION = 'OPTION_TAGS_CONVERSION';
 
 	/** @var array */
 	private $_aOptions;
@@ -52,7 +51,8 @@ class XmlCleaner {
 			self::OPTION_DECODE => [ ['&', '&amp;'] ],
 			self::OPTION_ENCODE_LOST_CHEVRON => true,
 			self::OPTION_DELETE_DOCTYPE => true,
-			self::OPTION_DELETE_PARASITIC => true
+			self::OPTION_DELETE_PARASITIC => true,
+			self::OPTION_TAGS_CONVERSION => [ 'br' ]
 		], $aOptions);
 
 	}
@@ -127,6 +127,9 @@ class XmlCleaner {
 
 		# DELETE PARASITIC
 		$this->_deleteParasitic();
+
+		# TAG CONVERSION
+		$this->_tagsConversion();
 
 		# DELETE WHITE SPACE
 		$this->_deleteWhiteSpace();
@@ -294,6 +297,25 @@ class XmlCleaner {
 	private function _deleteVerticalTab() {
 
 		$this->_sXML = str_replace("\x0B", '', $this->_sXML);
+
+	}
+
+	/**
+	 * TAGS CONVERSION
+	 *
+	 * @return void
+	 */
+	private function _tagsConversion() {
+
+		# ONLY IF ALLOWED
+		if(!$this->_aOptions[self::OPTION_TAGS_CONVERSION]) { return; }
+
+		# PROCESS
+		foreach ($this->_aOptions[self::OPTION_TAGS_CONVERSION] as $sTag) {
+
+			$this->_sXML = preg_replace("`<$sTag( [^>]*)?(?<!/)>`i", "<$sTag$1 />", $this->_sXML);
+
+		}
 
 	}
 
