@@ -126,7 +126,7 @@ class FormatML {
             # CONTENT
             switch(gettype($mItem)) {
                 case 'string':
-                    $sOutputString .= htmlentities($mItem);
+                    $sOutputString .= $mItem;
                     break;
                 case 'boolean':
                 case 'integer':
@@ -170,7 +170,7 @@ class FormatML {
 
         }
 
-        return html_entity_decode($sOutputString, ENT_QUOTES | ENT_HTML5);
+        return $sOutputString;
 
     }
 
