@@ -159,6 +159,10 @@ class XmlCleaner {
 	 * @return void
 	 */
 	private function _decode() {
+		
+		# PROTECT CHEVRONS
+		$this->_sXML = str_replace('&lt;', '&amp;lt;', $this->_sXML);
+		$this->_sXML = str_replace('&gt;', '&amp;gt;', $this->_sXML);
 
 		# HTML ENTITY
 		$this->_sXML = html_entity_decode($this->_sXML);
