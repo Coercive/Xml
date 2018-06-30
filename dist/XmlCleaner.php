@@ -11,7 +11,7 @@ use Exception;
  *
  * @author  	Anthony Moral <contact@coercive.fr>
  * @copyright   (c) 2018 Anthony Moral
- * @license 	http://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License
+ * @license 	MIT
  */
 class XmlCleaner
 {
