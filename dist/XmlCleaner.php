@@ -86,9 +86,7 @@ class XmlCleaner
 	public function loadString(string $xml): XmlCleaner
 	{
 		# Skip on error
-		if(!$xml || !is_string($xml)) {
-			throw new Exception('Can\'t load xml datas or empty');
-		}
+		if(!$xml) { throw new Exception('Can\'t load xml datas or empty'); }
 
 		# Set xml datas
 		$this->xml = $xml;
