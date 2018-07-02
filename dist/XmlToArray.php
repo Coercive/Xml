@@ -71,7 +71,7 @@ class XmlToArray
     public function parse(): XmlToArray
 	{
 		# Start parse process
-		if(null !== $this->datas) {
+		if(null === $this->datas) {
 			 $this->init();
 		}
 
