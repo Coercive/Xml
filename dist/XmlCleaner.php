@@ -330,7 +330,7 @@ class XmlCleaner
 	private function tagsConversion(): XmlCleaner
 	{
 		# Characters conversions if enabled
-		if(!$this->options[self::OPTION_TAGS_CONVERSION]) {
+		if($this->options[self::OPTION_TAGS_CONVERSION]) {
 			foreach ($this->options[self::OPTION_TAGS_CONVERSION] as $tag) {
 				$this->xml = preg_replace("`<$tag( [^>]*)?(?<!/)>`i", "<$tag$1 />", $this->xml);
 			}
