@@ -53,6 +53,32 @@ class FormatML
     private $output = '';
 
 	/**
+	 * AUTO REBUILD FROM X/HTML TO X/HTML
+	 *
+	 * @param string $content
+	 * @param array $attributes [optional]
+	 * @return string
+	 */
+	static public function autoRebuild(string $tag, string $content, array $attributes = []): string
+	{
+		# Attributes to string
+		$attrs = '';
+		foreach ($attributes as $name => $value) {
+			$attrs .= ' ' . $name . '="' . $value . '"';
+		}
+
+		# Reformat empty tags
+		if(!$content && in_array($tag, self::HTML_EMPTY_TAGS, true)) {
+			return '<' . $tag . $attrs . ' />';
+		}
+
+		# Classic reformat
+		else {
+			return '<' . $tag . $attrs . '>' . $content . '</' . $tag . '>';
+		}
+	}
+
+	/**
 	 * TO STRING
 	 *
 	 * @return string
@@ -203,37 +229,11 @@ class FormatML
 
             # Auto rebuild missing tags enabled
             elseif(is_string($key) && $this->options[self::OPTION_AUTO_REBUILD_MISSING_TAGS]) {
-	            $output = $this->autoRebuild($key, $output, $currentAttr ? $attributes[$currentAttr] : []);
+	            $output = self::autoRebuild($key, $output, $currentAttr ? $attributes[$currentAttr] : []);
             }
         }
 
         # Send formated content
         return $output;
-    }
-
-	/**
-	 * AUTO REBUILD FROM X/HTML TO X/HTML
-	 *
-	 * @param string $content
-	 * @param array $attributes [optional]
-	 * @return string
-	 */
-    private function autoRebuild(string $tag, string $content, array $attributes = []): string
-    {
-	    # Attributes to string
-	    $attrs = '';
-	    foreach ($attributes as $name => $value) {
-		    $attrs .= ' ' . $name . '="' . $value . '"';
-	    }
-
-	    # Reformat empty tags
-	    if(!$content && in_array($tag, self::HTML_EMPTY_TAGS, true)) {
-		    return '<' . $tag . $attrs . ' />';
-	    }
-
-	    # Classic reformat
-	    else {
-		    return '<' . $tag . $attrs . '>' . $content . '</' . $tag . '>';
-	    }
     }
 }
