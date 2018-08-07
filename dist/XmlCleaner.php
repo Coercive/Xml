@@ -36,7 +36,7 @@ class XmlCleaner
 	 */
 	public function __construct(array $options = [])
 	{
-		$this->options = array_replace_recursive([
+		$this->options = array_replace([
 			self::OPTION_DECODE => [ ['&', '&amp;'] ],
 			self::OPTION_ENCODE_LOST_CHEVRON => true,
 			self::OPTION_OVERENCODE_ENCODED_CHEVRON => true,
