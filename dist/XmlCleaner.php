@@ -144,7 +144,7 @@ class XmlCleaner
 	 *
 	 * @return XmlCleaner
 	 */
-	private function decode(): XmlCleaner
+	public function decode(): XmlCleaner
 	{
 		# Force overencode already encoded chevron if enabled
 		if($this->options[self::OPTION_OVERENCODE_ENCODED_CHEVRON]) {
@@ -169,7 +169,7 @@ class XmlCleaner
 	 *
 	 * @return XmlCleaner
 	 */
-	private function encodeLostChevrons(): XmlCleaner
+	public function encodeLostChevrons(): XmlCleaner
 	{
 		# Not activated
 		if(!$this->options[self::OPTION_ENCODE_LOST_CHEVRON]) { return $this; }
@@ -204,7 +204,7 @@ class XmlCleaner
 	 *
 	 * @return XmlCleaner
 	 */
-	private function deleteDoctype(): XmlCleaner
+	public function deleteDoctype(): XmlCleaner
 	{
 		# Delete doctype if activated
 		if($this->options[self::OPTION_DELETE_DOCTYPE]) {
@@ -224,7 +224,7 @@ class XmlCleaner
 	 *
 	 * @return XmlCleaner
 	 */
-	private function deleteParasitic(): XmlCleaner
+	public function deleteParasitic(): XmlCleaner
 	{
 		# Delete parasitics datas if option enabled
 		if($this->options[self::OPTION_DELETE_PARASITIC]) {
@@ -241,7 +241,7 @@ class XmlCleaner
 	 *
 	 * @return XmlCleaner
 	 */
-	private function deleteWhiteSpace(): XmlCleaner
+	public function deleteWhiteSpace(): XmlCleaner
 	{
 		# Delete double whitespaces
 		while(strpos($this->xml, '  ') !== false) {
@@ -257,7 +257,7 @@ class XmlCleaner
 	 *
 	 * @return XmlCleaner
 	 */
-	private function deleteTabulate(): XmlCleaner
+	public function deleteTabulate(): XmlCleaner
 	{
 		# Delete tabulate characters
 		$this->xml = str_replace("\t", '', $this->xml);
@@ -271,7 +271,7 @@ class XmlCleaner
 	 *
 	 * @return XmlCleaner
 	 */
-	private function deleteLineFeed(): XmlCleaner
+	public function deleteLineFeed(): XmlCleaner
 	{
 		# Delete new line characters
 		$this->xml = str_replace("\n", '', $this->xml);
@@ -285,7 +285,7 @@ class XmlCleaner
 	 *
 	 * @return XmlCleaner
 	 */
-	private function deleteCarriageReturn(): XmlCleaner
+	public function deleteCarriageReturn(): XmlCleaner
 	{
 		# Delete new carriage characters
 		$this->xml = str_replace("\r", '', $this->xml);
@@ -299,7 +299,7 @@ class XmlCleaner
 	 *
 	 * @return XmlCleaner
 	 */
-	private function deleteNullByte(): XmlCleaner
+	public function deleteNullByte(): XmlCleaner
 	{
 		# Delete null byte characters
 		$this->xml = str_replace("\0", '', $this->xml);
@@ -313,7 +313,7 @@ class XmlCleaner
 	 *
 	 * @return XmlCleaner
 	 */
-	private function deleteVerticalTab(): XmlCleaner
+	public function deleteVerticalTab(): XmlCleaner
 	{
 		# Delete vertical tabs characters
 		$this->xml = str_replace("\x0B", '', $this->xml);
@@ -327,7 +327,7 @@ class XmlCleaner
 	 *
 	 * @return XmlCleaner
 	 */
-	private function tagsConversion(): XmlCleaner
+	public function tagsConversion(): XmlCleaner
 	{
 		# Characters conversions if enabled
 		if($this->options[self::OPTION_TAGS_CONVERSION]) {
