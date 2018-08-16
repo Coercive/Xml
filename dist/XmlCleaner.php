@@ -264,7 +264,7 @@ class XmlCleaner
 	{
 		# Delete parasitics datas if option enabled
 		if($this->options[self::OPTION_DELETE_SCRIPT]) {
-			$this->xml = preg_replace('`\<script.*\<\/script\>`i', '', $this->xml);
+			$this->xml = preg_replace('`<script[^>]*?>.*?</script>`is', '', $this->xml);
 		}
 
 		# Maintain chainability
@@ -282,7 +282,7 @@ class XmlCleaner
 	{
 		# Delete doctype if activated
 		if($this->options[self::OPTION_DELETE_COMMENT]) {
-			$this->xml = preg_replace('`<!--.*-->`', '', $this->xml);
+			$this->xml = preg_replace('`<!--.*?-->`s', '', $this->xml);
 		}
 
 		# Maintain chainability
