@@ -16,13 +16,14 @@ use Exception;
 class XmlCleaner
 {
 	# CLASS OPTIONS
-	const OPTION_DECODE = 'DECODE';
+	const OPTION_DECODE = 'OPTION_DECODE';
 	const OPTION_ENCODE_LOST_CHEVRON = 'OPTION_ENCODE_LOST_CHEVRON';
 	const OPTION_OVERENCODE_ENCODED_CHEVRON = 'OPTION_OVERENCODE_ENCODED_CHEVRON';
 	const OPTION_OVERENCODE_ENCODED_QUOT = 'OPTION_OVERENCODE_ENCODED_QUOT';
-	const OPTION_DELETE_DOCTYPE = 'DELETE_DOCTYPE';
+	const OPTION_DELETE_DOCTYPE = 'OPTION_DELETE_DOCTYPE';
 	const OPTION_DELETE_COMMENT = 'OPTION_DELETE_COMMENT';
-	const OPTION_DELETE_PARASITIC = 'DELETE_DELETE_PARASITIC';
+	const OPTION_DELETE_PARASITIC = 'OPTION_DELETE_PARASITIC';
+	const OPTION_DELETE_SCRIPT = 'OPTION_DELETE_SCRIPT';
 	const OPTION_TAGS_CONVERSION = 'OPTION_TAGS_CONVERSION';
 
 	/** @var array */
@@ -46,6 +47,7 @@ class XmlCleaner
 			self::OPTION_DELETE_DOCTYPE => true,
 			self::OPTION_DELETE_PARASITIC => true,
 			self::OPTION_DELETE_COMMENT => true,
+			self::OPTION_DELETE_SCRIPT => true,
 			self::OPTION_TAGS_CONVERSION => [ 'br' ]
 		], $options);
 	}
@@ -120,6 +122,9 @@ class XmlCleaner
 
 		# DELETE COMMENTS
 		$this->deleteComments();
+
+		# DELETE SCRIPTS
+		$this->deleteScripts();
 
 		# TAG CONVERSION
 		$this->tagsConversion();
@@ -242,6 +247,24 @@ class XmlCleaner
 		if($this->options[self::OPTION_DELETE_PARASITIC]) {
 			$this->xml = preg_replace('`\<\?(?!xml)[^<]*\>`i', '', $this->xml);
 			$this->xml = preg_replace('`\<\?[^<]*\?\>`i', '', $this->xml);
+		}
+
+		# Maintain chainability
+		return $this;
+	}
+
+	/**
+	 * DELETE SCRIPTS
+	 *
+	 * Examples :   <script> ... </script>
+	 *
+	 * @return XmlCleaner
+	 */
+	public function deleteScripts(): XmlCleaner
+	{
+		# Delete parasitics datas if option enabled
+		if($this->options[self::OPTION_DELETE_SCRIPT]) {
+			$this->xml = preg_replace('`\<script.*\<\/script\>`i', '', $this->xml);
 		}
 
 		# Maintain chainability
