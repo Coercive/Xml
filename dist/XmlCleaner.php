@@ -19,6 +19,7 @@ class XmlCleaner
 	const OPTION_DECODE = 'DECODE';
 	const OPTION_ENCODE_LOST_CHEVRON = 'OPTION_ENCODE_LOST_CHEVRON';
 	const OPTION_OVERENCODE_ENCODED_CHEVRON = 'OPTION_OVERENCODE_ENCODED_CHEVRON';
+	const OPTION_OVERENCODE_ENCODED_QUOT = 'OPTION_OVERENCODE_ENCODED_QUOT';
 	const OPTION_DELETE_DOCTYPE = 'DELETE_DOCTYPE';
 	const OPTION_DELETE_COMMENT = 'OPTION_DELETE_COMMENT';
 	const OPTION_DELETE_PARASITIC = 'DELETE_DELETE_PARASITIC';
@@ -41,6 +42,7 @@ class XmlCleaner
 			self::OPTION_DECODE => [ ['&', '&amp;'] ],
 			self::OPTION_ENCODE_LOST_CHEVRON => true,
 			self::OPTION_OVERENCODE_ENCODED_CHEVRON => true,
+			self::OPTION_OVERENCODE_ENCODED_QUOT => false,
 			self::OPTION_DELETE_DOCTYPE => true,
 			self::OPTION_DELETE_PARASITIC => true,
 			self::OPTION_DELETE_COMMENT => true,
@@ -155,6 +157,11 @@ class XmlCleaner
 		if($this->options[self::OPTION_OVERENCODE_ENCODED_CHEVRON]) {
 			$this->xml = str_replace('&lt;', '&amp;lt;', $this->xml);
 			$this->xml = str_replace('&gt;', '&amp;gt;', $this->xml);
+		}
+
+		# Force overencode already encoded quote if enabled
+		if($this->options[self::OPTION_OVERENCODE_ENCODED_QUOT]) {
+			$this->xml = str_replace('&quot;', '&amp;quot;', $this->xml);
 		}
 
 		# Decode entities datas
