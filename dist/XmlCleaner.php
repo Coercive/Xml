@@ -20,6 +20,7 @@ class XmlCleaner
 	const OPTION_ENCODE_LOST_CHEVRON = 'OPTION_ENCODE_LOST_CHEVRON';
 	const OPTION_OVERENCODE_ENCODED_CHEVRON = 'OPTION_OVERENCODE_ENCODED_CHEVRON';
 	const OPTION_DELETE_DOCTYPE = 'DELETE_DOCTYPE';
+	const OPTION_DELETE_COMMENT = 'OPTION_DELETE_COMMENT';
 	const OPTION_DELETE_PARASITIC = 'DELETE_DELETE_PARASITIC';
 	const OPTION_TAGS_CONVERSION = 'OPTION_TAGS_CONVERSION';
 
@@ -42,6 +43,7 @@ class XmlCleaner
 			self::OPTION_OVERENCODE_ENCODED_CHEVRON => true,
 			self::OPTION_DELETE_DOCTYPE => true,
 			self::OPTION_DELETE_PARASITIC => true,
+			self::OPTION_DELETE_COMMENT => true,
 			self::OPTION_TAGS_CONVERSION => [ 'br' ]
 		], $options);
 	}
@@ -113,6 +115,9 @@ class XmlCleaner
 
 		# DELETE PARASITIC
 		$this->deleteParasitic();
+
+		# DELETE COMMENTS
+		$this->deleteComments();
 
 		# TAG CONVERSION
 		$this->tagsConversion();
@@ -230,6 +235,24 @@ class XmlCleaner
 		if($this->options[self::OPTION_DELETE_PARASITIC]) {
 			$this->xml = preg_replace('`\<\?(?!xml)[^<]*\>`i', '', $this->xml);
 			$this->xml = preg_replace('`\<\?[^<]*\?\>`i', '', $this->xml);
+		}
+
+		# Maintain chainability
+		return $this;
+	}
+
+	/**
+	 * DELETE COMMENTS
+	 *
+	 * Example : <!-- ... -->
+	 *
+	 * @return XmlCleaner
+	 */
+	public function deleteComments(): XmlCleaner
+	{
+		# Delete doctype if activated
+		if($this->options[self::OPTION_DELETE_COMMENT]) {
+			$this->xml = preg_replace('`<!--.*-->`', '', $this->xml);
 		}
 
 		# Maintain chainability
