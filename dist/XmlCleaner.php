@@ -24,6 +24,7 @@ class XmlCleaner
 	const OPTION_DELETE_COMMENT = 'OPTION_DELETE_COMMENT';
 	const OPTION_DELETE_PARASITIC = 'OPTION_DELETE_PARASITIC';
 	const OPTION_DELETE_SCRIPT = 'OPTION_DELETE_SCRIPT';
+	const OPTION_DELETE_IFRAME = 'OPTION_DELETE_IFRAME';
 	const OPTION_TAGS_CONVERSION = 'OPTION_TAGS_CONVERSION';
 
 	/** @var array */
@@ -48,6 +49,7 @@ class XmlCleaner
 			self::OPTION_DELETE_PARASITIC => true,
 			self::OPTION_DELETE_COMMENT => true,
 			self::OPTION_DELETE_SCRIPT => true,
+			self::OPTION_DELETE_IFRAME => false,
 			self::OPTION_TAGS_CONVERSION => [ 'br' ]
 		], $options);
 	}
@@ -125,6 +127,9 @@ class XmlCleaner
 
 		# DELETE SCRIPTS
 		$this->deleteScripts();
+
+		# DELETE IFRAMES
+		$this->deleteIframes();
 
 		# TAG CONVERSION
 		$this->tagsConversion();
@@ -265,6 +270,24 @@ class XmlCleaner
 		# Delete parasitics datas if option enabled
 		if($this->options[self::OPTION_DELETE_SCRIPT]) {
 			$this->xml = preg_replace('`<script[^>]*?>.*?</script>`is', '', $this->xml);
+		}
+
+		# Maintain chainability
+		return $this;
+	}
+
+	/**
+	 * DELETE IFRAME
+	 *
+	 * Examples :   <iframe></iframe>
+	 *
+	 * @return XmlCleaner
+	 */
+	public function deleteIframes(): XmlCleaner
+	{
+		# Delete parasitics datas if option enabled
+		if($this->options[self::OPTION_DELETE_IFRAME]) {
+			$this->xml = preg_replace('`<iframe[^>]*?>.*?</iframe>`is', '', $this->xml);
 		}
 
 		# Maintain chainability
