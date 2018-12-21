@@ -123,6 +123,9 @@ class ExtractArray
 		# No datas, no process
 		if(!$root) { return $root; }
 
+		# No container
+		if(!is_array($root)) { return $root; }
+
 		# Recursive search
 		foreach($root as $current => $datas) {
 
