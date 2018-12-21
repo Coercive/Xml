@@ -16,11 +16,15 @@ use Exception;
 class XmlCleaner
 {
 	# CLASS OPTIONS
-	const OPTION_DECODE = 'DECODE';
+	const OPTION_DECODE = 'OPTION_DECODE';
 	const OPTION_ENCODE_LOST_CHEVRON = 'OPTION_ENCODE_LOST_CHEVRON';
 	const OPTION_OVERENCODE_ENCODED_CHEVRON = 'OPTION_OVERENCODE_ENCODED_CHEVRON';
-	const OPTION_DELETE_DOCTYPE = 'DELETE_DOCTYPE';
-	const OPTION_DELETE_PARASITIC = 'DELETE_DELETE_PARASITIC';
+	const OPTION_OVERENCODE_ENCODED_QUOT = 'OPTION_OVERENCODE_ENCODED_QUOT';
+	const OPTION_DELETE_DOCTYPE = 'OPTION_DELETE_DOCTYPE';
+	const OPTION_DELETE_COMMENT = 'OPTION_DELETE_COMMENT';
+	const OPTION_DELETE_PARASITIC = 'OPTION_DELETE_PARASITIC';
+	const OPTION_DELETE_SCRIPT = 'OPTION_DELETE_SCRIPT';
+	const OPTION_DELETE_IFRAME = 'OPTION_DELETE_IFRAME';
 	const OPTION_TAGS_CONVERSION = 'OPTION_TAGS_CONVERSION';
 
 	/** @var array */
@@ -36,12 +40,16 @@ class XmlCleaner
 	 */
 	public function __construct(array $options = [])
 	{
-		$this->options = array_replace_recursive([
+		$this->options = array_replace([
 			self::OPTION_DECODE => [ ['&', '&amp;'] ],
 			self::OPTION_ENCODE_LOST_CHEVRON => true,
 			self::OPTION_OVERENCODE_ENCODED_CHEVRON => true,
+			self::OPTION_OVERENCODE_ENCODED_QUOT => false,
 			self::OPTION_DELETE_DOCTYPE => true,
 			self::OPTION_DELETE_PARASITIC => true,
+			self::OPTION_DELETE_COMMENT => true,
+			self::OPTION_DELETE_SCRIPT => true,
+			self::OPTION_DELETE_IFRAME => false,
 			self::OPTION_TAGS_CONVERSION => [ 'br' ]
 		], $options);
 	}
@@ -114,6 +122,15 @@ class XmlCleaner
 		# DELETE PARASITIC
 		$this->deleteParasitic();
 
+		# DELETE COMMENTS
+		$this->deleteComments();
+
+		# DELETE SCRIPTS
+		$this->deleteScripts();
+
+		# DELETE IFRAMES
+		$this->deleteIframes();
+
 		# TAG CONVERSION
 		$this->tagsConversion();
 
@@ -144,12 +161,17 @@ class XmlCleaner
 	 *
 	 * @return XmlCleaner
 	 */
-	private function decode(): XmlCleaner
+	public function decode(): XmlCleaner
 	{
 		# Force overencode already encoded chevron if enabled
 		if($this->options[self::OPTION_OVERENCODE_ENCODED_CHEVRON]) {
 			$this->xml = str_replace('&lt;', '&amp;lt;', $this->xml);
 			$this->xml = str_replace('&gt;', '&amp;gt;', $this->xml);
+		}
+
+		# Force overencode already encoded quote if enabled
+		if($this->options[self::OPTION_OVERENCODE_ENCODED_QUOT]) {
+			$this->xml = str_replace('&quot;', '&amp;quot;', $this->xml);
 		}
 
 		# Decode entities datas
@@ -169,7 +191,7 @@ class XmlCleaner
 	 *
 	 * @return XmlCleaner
 	 */
-	private function encodeLostChevrons(): XmlCleaner
+	public function encodeLostChevrons(): XmlCleaner
 	{
 		# Not activated
 		if(!$this->options[self::OPTION_ENCODE_LOST_CHEVRON]) { return $this; }
@@ -204,7 +226,7 @@ class XmlCleaner
 	 *
 	 * @return XmlCleaner
 	 */
-	private function deleteDoctype(): XmlCleaner
+	public function deleteDoctype(): XmlCleaner
 	{
 		# Delete doctype if activated
 		if($this->options[self::OPTION_DELETE_DOCTYPE]) {
@@ -224,7 +246,7 @@ class XmlCleaner
 	 *
 	 * @return XmlCleaner
 	 */
-	private function deleteParasitic(): XmlCleaner
+	public function deleteParasitic(): XmlCleaner
 	{
 		# Delete parasitics datas if option enabled
 		if($this->options[self::OPTION_DELETE_PARASITIC]) {
@@ -237,11 +259,65 @@ class XmlCleaner
 	}
 
 	/**
+	 * DELETE SCRIPTS
+	 *
+	 * Examples :   <script> ... </script>
+	 *
+	 * @return XmlCleaner
+	 */
+	public function deleteScripts(): XmlCleaner
+	{
+		# Delete parasitics datas if option enabled
+		if($this->options[self::OPTION_DELETE_SCRIPT]) {
+			$this->xml = preg_replace('`<script[^>]*?>.*?</script>`is', '', $this->xml);
+		}
+
+		# Maintain chainability
+		return $this;
+	}
+
+	/**
+	 * DELETE IFRAME
+	 *
+	 * Examples :   <iframe></iframe>
+	 *
+	 * @return XmlCleaner
+	 */
+	public function deleteIframes(): XmlCleaner
+	{
+		# Delete parasitics datas if option enabled
+		if($this->options[self::OPTION_DELETE_IFRAME]) {
+			$this->xml = preg_replace('`<iframe[^>]*?>.*?</iframe>`is', '', $this->xml);
+		}
+
+		# Maintain chainability
+		return $this;
+	}
+
+	/**
+	 * DELETE COMMENTS
+	 *
+	 * Example : <!-- ... -->
+	 *
+	 * @return XmlCleaner
+	 */
+	public function deleteComments(): XmlCleaner
+	{
+		# Delete doctype if activated
+		if($this->options[self::OPTION_DELETE_COMMENT]) {
+			$this->xml = preg_replace('`<!--.*?-->`s', '', $this->xml);
+		}
+
+		# Maintain chainability
+		return $this;
+	}
+
+	/**
 	 * WHITE SPACE
 	 *
 	 * @return XmlCleaner
 	 */
-	private function deleteWhiteSpace(): XmlCleaner
+	public function deleteWhiteSpace(): XmlCleaner
 	{
 		# Delete double whitespaces
 		while(strpos($this->xml, '  ') !== false) {
@@ -257,7 +333,7 @@ class XmlCleaner
 	 *
 	 * @return XmlCleaner
 	 */
-	private function deleteTabulate(): XmlCleaner
+	public function deleteTabulate(): XmlCleaner
 	{
 		# Delete tabulate characters
 		$this->xml = str_replace("\t", '', $this->xml);
@@ -271,7 +347,7 @@ class XmlCleaner
 	 *
 	 * @return XmlCleaner
 	 */
-	private function deleteLineFeed(): XmlCleaner
+	public function deleteLineFeed(): XmlCleaner
 	{
 		# Delete new line characters
 		$this->xml = str_replace("\n", '', $this->xml);
@@ -285,7 +361,7 @@ class XmlCleaner
 	 *
 	 * @return XmlCleaner
 	 */
-	private function deleteCarriageReturn(): XmlCleaner
+	public function deleteCarriageReturn(): XmlCleaner
 	{
 		# Delete new carriage characters
 		$this->xml = str_replace("\r", '', $this->xml);
@@ -299,7 +375,7 @@ class XmlCleaner
 	 *
 	 * @return XmlCleaner
 	 */
-	private function deleteNullByte(): XmlCleaner
+	public function deleteNullByte(): XmlCleaner
 	{
 		# Delete null byte characters
 		$this->xml = str_replace("\0", '', $this->xml);
@@ -313,7 +389,7 @@ class XmlCleaner
 	 *
 	 * @return XmlCleaner
 	 */
-	private function deleteVerticalTab(): XmlCleaner
+	public function deleteVerticalTab(): XmlCleaner
 	{
 		# Delete vertical tabs characters
 		$this->xml = str_replace("\x0B", '', $this->xml);
@@ -327,10 +403,10 @@ class XmlCleaner
 	 *
 	 * @return XmlCleaner
 	 */
-	private function tagsConversion(): XmlCleaner
+	public function tagsConversion(): XmlCleaner
 	{
 		# Characters conversions if enabled
-		if(!$this->options[self::OPTION_TAGS_CONVERSION]) {
+		if($this->options[self::OPTION_TAGS_CONVERSION]) {
 			foreach ($this->options[self::OPTION_TAGS_CONVERSION] as $tag) {
 				$this->xml = preg_replace("`<$tag( [^>]*)?(?<!/)>`i", "<$tag$1 />", $this->xml);
 			}

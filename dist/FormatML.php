@@ -16,9 +16,29 @@ use Exception;
 class FormatML
 {
     const CONTENT = '_@$#&|||~~~REPLACE_CONTENT~~~|||&#$@_';
+    const AUTO_ML = '_@$#&|||~~~AUTO_REBUILD_CONTENT~~~|||&#$@_';
 
     const OPTION_ALL_TAGS_REQUIRED = 'OPTION_ALL_TAGS_REQUIRED';
     const OPTION_SKIP_MISSING_TAGS_CONTENT = 'OPTION_SKIP_MISSING_TAGS_CONTENT';
+    const OPTION_AUTO_REBUILD_MISSING_TAGS = 'OPTION_AUTO_REBUILD_MISSING_TAGS';
+
+    const HTML_EMPTY_TAGS = [
+		'area',
+		'base',
+		'br',
+		'col',
+		'embed',
+		'hr',
+		'img',
+		'input',
+		'keygen',
+		'link',
+		'meta',
+		'param',
+		'source',
+		'track',
+		'wbr',
+	];
 
 	/** @var array */
 	private $options = [];
@@ -31,6 +51,32 @@ class FormatML
 
     /** @var string */
     private $output = '';
+
+	/**
+	 * AUTO REBUILD FROM X/HTML TO X/HTML
+	 *
+	 * @param string $content
+	 * @param array $attributes [optional]
+	 * @return string
+	 */
+	static public function autoRebuild(string $tag, string $content, array $attributes = []): string
+	{
+		# Attributes to string
+		$attrs = '';
+		foreach ($attributes as $name => $value) {
+			$attrs .= ' ' . $name . '="' . $value . '"';
+		}
+
+		# Reformat empty tags
+		if(!$content && in_array($tag, self::HTML_EMPTY_TAGS, true)) {
+			return '<' . $tag . $attrs . ' />';
+		}
+
+		# Classic reformat
+		else {
+			return '<' . $tag . $attrs . '>' . $content . '</' . $tag . '>';
+		}
+	}
 
 	/**
 	 * TO STRING
@@ -69,8 +115,14 @@ class FormatML
         # Set options (with default)
         $this->options = array_replace_recursive([
             self::OPTION_ALL_TAGS_REQUIRED => false,
-            self::OPTION_SKIP_MISSING_TAGS_CONTENT => false
+            self::OPTION_SKIP_MISSING_TAGS_CONTENT => false,
+            self::OPTION_AUTO_REBUILD_MISSING_TAGS => false
         ], $options);
+
+        # Verify options
+        if(($this->options[self::OPTION_ALL_TAGS_REQUIRED] || $this->options[self::OPTION_SKIP_MISSING_TAGS_CONTENT]) && $this->options[self::OPTION_AUTO_REBUILD_MISSING_TAGS]) {
+        	throw new Exception('You can\'t use autorebuild system if you required all tag or want to skip missing tags content.');
+        }
 
         # Format document
         $this->output = $this->format($this->source);
@@ -144,6 +196,14 @@ class FormatML
 
                 	# Automatic replace
                     case 'string':
+
+                    	# AUTO REBUILD
+                    	if($directive === self::AUTO_ML) {
+		                    $output = $this->autoRebuild($key, $output, $currentAttr ? $attributes[$currentAttr] : []);
+		                    break;
+	                    }
+
+	                    # AUTO REPLACE
                         $output = str_replace(self::CONTENT, $output, $directive);
                         break;
 
@@ -167,6 +227,10 @@ class FormatML
                 $output = '';
             }
 
+            # Auto rebuild missing tags enabled
+            elseif(is_string($key) && $this->options[self::OPTION_AUTO_REBUILD_MISSING_TAGS]) {
+	            $output = self::autoRebuild($key, $output, $currentAttr ? $attributes[$currentAttr] : []);
+            }
         }
 
         # Send formated content
