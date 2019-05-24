@@ -213,7 +213,7 @@ class ExtractArray
 			}
 
 			# RECURSIF LAUNCH
-			if(!$this->foreground && is_array($data)) {
+			if($this->foreground && is_array($data)) {
 				$datas[$current] = $this->extract($data, $key);
 				if(!$this->all && $this->founded) { return $datas; }
 			}
