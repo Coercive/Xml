@@ -15,13 +15,17 @@ use Exception;
  */
 class ExtractArray
 {
-	# PROPERTIES ASSIGNEMENT
-	const ROOT = 'ROOT';
-	const ROOT_DELIMITER = 'ROOT_DELIMITER';
-	const ROOT_REQUIRED = 'ROOT_REQUIRED';
+	/** @var bool Array is init */
+	private $booted = false;
 
-	/** @var array */
-	private $options;
+	/** @var string Root path */
+	private $root = '/';
+
+	/** @var string Path step delimiter */
+	private $delimiter = '/';
+
+	/** @var bool Path required */
+	private $required = false;
 
 	/** @var array */
 	private $source;
@@ -48,80 +52,13 @@ class ExtractArray
 	private $foreground;
 
 	/**
-	 * ExtractArray constructor.
-	 *
-	 * @param array $datas
-	 * @param array $options [optional]
-	 * @throws Exception
-	 */
-	public function __construct(array $datas, array $options = [])
-	{
-		# Prepare options
-		$this->options = array_replace_recursive([
-			self::ROOT => '/',
-            self::ROOT_DELIMITER => '/',
-            self::ROOT_REQUIRED => false
-		], $options);
-
-		# Verify datas
-        if(!$datas) { throw new Exception('Can\'t extract empty datas'); }
-
-        # Set source
-		$this->source = $datas;
-
-        # Verify root
-        if(!$this->options[self::ROOT] || !is_string($this->options[self::ROOT]) && !is_array($this->options[self::ROOT])) {
-			throw new Exception('Root must be a valid string or array and not empty');
-        }
-
-        # Verify delimiter
-        if(is_string($this->options[self::ROOT]) && (!$this->options[self::ROOT_DELIMITER] || !is_string($this->options[self::ROOT_DELIMITER]))) {
-			throw new Exception('Root is set as string, but the delimiter is empty or not string');
-        }
-
-        # Set path
-		$this->path = is_string($this->options[self::ROOT]) ? explode('/', trim($this->options[self::ROOT], " \t\n\r\0\x0B/")) : $this->options[self::ROOT];
-
-        # Init root array for process
-        $this->setRoot();
-	}
-
-	/**
-	 * SET ROOT ARRAY
-	 *
-	 * @return void
-	 * @throws Exception
-	 */
-	private function setRoot()
-	{
-		# Init root for process
-		$root = $this->source;
-
-		# Assign root
-		foreach($this->path as $key) {
-
-			# Reasign root
-			$root = $this->search($root, $key);
-
-			# Required but not found : skip error
-			if(!$this->recurse && $this->options[self::ROOT_REQUIRED]) {
-				throw new Exception('Required root not found. Clé : ' . $key);
-			}
-
-		}
-
-		# Set datas for process
-        $this->processed = $root;
-	}
-
-	/**
 	 * RECURSIVE SEARCH
 	 *
 	 * @param array|mixed $root : Can be mixed if deep parse (field content)
 	 * @param string $key : no int ! String compare
 	 * @return array|mixed : Array of element or field content
 	 */
-	private function search($root, string $key)
+	private function root($root, string $key)
 	{
 		# Initialize found recurse
 		$this->recurse = false;
@@ -148,41 +85,12 @@ class ExtractArray
 			}
 
 			# Recursif launch
-			$inside = $this->search($datas, $key);
+			$inside = $this->root($datas, $key);
 			if($this->recurse) { return $inside; }
 		}
 
 		# Not found
 		return $root;
-	}
-
-	/**
-	 * GETTER
-	 *
-	 * /!\ Array of Arrays [ [], [], [] ... ] or string if uniq element
-	 *
-	 * @param string $key [optional]
-	 * @param bool $all [optional]
-	 * @param bool $foreground [optional]
-	 * @return array|mixed
-	 */
-	public function get(string $key = null, bool $all = false, $foreground = false)
-	{
-		# Initialize properties
-		$this->all = $all;
-		$this->foreground = $foreground;
-		$this->founded = false;
-		$this->result = [];
-
-		# Empty target
-		if(!$this->processed) { return $this->processed; }
-
-		# Root content
-		if(null === $key) { return $this->processed; }
-
-		# Start recurse extract search
-		$this->processed = $this->extract($this->processed, $key);
-		return $this->result;
 	}
 
 	/**
@@ -200,7 +108,7 @@ class ExtractArray
 		# Recursive search : key, inside key, or loop
 		foreach($datas as $current => $data) {
 
-			# Current key founded
+			# CURRENT KEY FOUNDED
 			if($key === (string) $current) {
 				unset($datas[$current]);
 				$this->result[] = [$current => $data];
@@ -209,7 +117,7 @@ class ExtractArray
 				continue;
 			}
 
-			# First basement
+			# FOREGROUND
 			if(is_numeric($current) && is_array($data) && isset($data[$key])) {
 				unset($datas[$current][$key]);
 				$this->result[] = $data;
@@ -218,7 +126,7 @@ class ExtractArray
 				continue;
 			}
 
-			# Recursive extract
+			# RECURSIF LAUNCH
 			if($this->foreground && is_array($data)) {
 				$datas[$current] = $this->extract($data, $key);
 				if(!$this->all && $this->founded) { return $datas; }
@@ -228,5 +136,144 @@ class ExtractArray
 
 		# Send prepared datas
 		return $datas;
+	}
+
+	/**
+	 * ExtractArray constructor.
+	 *
+	 * @param array $datas
+	 * @param string $root [optional]
+	 * @param string $delimiter [optional]
+	 * @param bool $required [optional]
+	 * @throws Exception
+	 */
+	public function __construct(array $datas, string $root = '/', string $delimiter = '/', bool $required = false)
+	{
+		# Set source
+		$this->source = $datas;
+		if(!$datas) {
+			throw new Exception('Can\'t extract empty datas');
+		}
+
+		# Auto set
+		$this
+			->setRoot($root)
+			->setDelimiter($delimiter)
+			->setRequired($required);
+	}
+
+	/**
+	 * Set root path
+	 *
+	 * @param string $root [optional]
+	 * @return ExtractArray
+	 */
+	public function setRoot(string $root = '/'): ExtractArray
+	{
+		if(!$root) {
+			throw new Exception('Root must be a valid string and not empty.');
+		}
+		$this->root = $root;
+		return $this;
+	}
+
+	/**
+	 * Set delimiter
+	 *
+	 * @param string $delimiter [optional]
+	 * @return ExtractArray
+	 */
+	public function setDelimiter(string $delimiter = '/'): ExtractArray
+	{
+		if(!$delimiter) {
+			throw new Exception('Delimiter is empty.');
+		}
+		$this->delimiter = $delimiter;
+		return $this;
+	}
+
+	/**
+	 * Set requiered path
+	 *
+	 * @param bool $state [optional]
+	 * @return ExtractArray
+	 */
+	public function setRequired(bool $state = false): ExtractArray
+	{
+		$this->required = $state;
+		return $this;
+	}
+
+	/**
+	 * Set root array
+	 *
+	 * @return void
+	 * @throws Exception
+	 */
+	public function boot()
+	{
+		# Set path
+		$this->path = explode($this->delimiter, trim($this->root, " \t\n\r\0\x0B{$this->delimiter}"));
+
+		# Init root for process
+		$root = $this->source;
+
+		# Assign root
+		foreach($this->path as $key) {
+
+			# Reasign root
+			$root = $this->root($root, $key);
+
+			# Required but not found : skip error
+			if(!$this->recurse && $this->required) {
+				throw new Exception('Required root not found for key : ' . $key . ', in this path : ' . $this->root);
+			}
+
+		}
+
+		# Set datas for process
+		$this->processed = $root;
+
+		# Set already booted
+		$this->booted = true;
+	}
+
+	/**
+	 * GETTER
+	 *
+	 * /!\ Array of Arrays [ [], [], [] ... ] or string if uniq element
+	 *
+	 * @param string $key [optional]
+	 * @param bool $all [optional]
+	 * @param bool $foreground [optional]
+	 * @return array|mixed
+	 * @throws Exception
+	 */
+	public function get(string $key = null, bool $all = false, $foreground = false)
+	{
+		# Auto boot
+		if(!$this->booted) {
+			$this->boot();
+		}
+
+		# Initialize properties
+		$this->all = $all;
+		$this->foreground = $foreground;
+		$this->founded = false;
+		$this->result = [];
+
+		# Empty target
+		if(!$this->processed) {
+			return $this->processed;
+		}
+
+		# Root content
+		if(null === $key) {
+			return $this->processed;
+		}
+
+		# Start recurse extract search
+		$this->processed = $this->extract($this->processed, $key);
+		return $this->result;
 	}
 }
