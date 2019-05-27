@@ -80,11 +80,6 @@ use \Coercive\Utility\Xml\ExtractArray;
 $extractArray = new ExtractArray($xml);
 
 # You can add some options
-$extractArray = new ExtractArray($xml, [
-    self::ROOT => '/example/subexample',
-    self::ROOT_DELIMITER => '/',
-    self::ROOT_REQUIRED => false
-]);
 $extractArray->setRoot('/example/subexample');
 $extractArray->setDelimiter('/');
 $extractArray->setRequired(false);
