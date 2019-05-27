@@ -10,7 +10,7 @@ use Exception;
  * @link		https://github.com/Coercive/Xml
  *
  * @author  	Anthony Moral <contact@coercive.fr>
- * @copyright   (c) 2018 Anthony Moral
+ * @copyright   (c) 2019 Anthony Moral
  * @license 	MIT
  */
 class ExtractArray
@@ -37,8 +37,14 @@ class ExtractArray
 
 	/** @var bool */
 	private $recurse;
+
+	/** @var bool */
 	private $all;
+
+	/** @var bool */
 	private $founded;
+
+	/** @var bool */
 	private $foreground;
 
 	/**
@@ -194,17 +200,17 @@ class ExtractArray
 		# Recursive search : key, inside key, or loop
 		foreach($datas as $current => $data) {
 
-			# CURRENT KEY FOUNDED
+			# Current key founded
 			if($key === (string) $current) {
 				unset($datas[$current]);
-				$this->result[] = $data;
+				$this->result[] = [$current => $data];
 				$this->founded = true;
 				if(!$this->all) { return $datas; }
 				continue;
 			}
 
-			# FOREGROUND
-			if(is_numeric($current) && $this->foreground && is_array($data) && isset($data[$key])) {
+			# First basement
+			if(is_numeric($current) && is_array($data) && isset($data[$key])) {
 				unset($datas[$current][$key]);
 				$this->result[] = $data;
 				$this->founded = true;
@@ -212,7 +218,7 @@ class ExtractArray
 				continue;
 			}
 
-			# RECURSIF LAUNCH
+			# Recursive extract
 			if($this->foreground && is_array($data)) {
 				$datas[$current] = $this->extract($data, $key);
 				if(!$this->all && $this->founded) { return $datas; }
