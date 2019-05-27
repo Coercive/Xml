@@ -19,29 +19,29 @@ XmlCleaner
 use \Coercive\Utility\Xml\XmlCleaner;
 
 # Load cleaner
-$oCleaner = new XmlCleaner();
+$cleaner = new XmlCleaner();
 
 # You can add some options
-$oCleaner = new XmlCleaner([
+$cleaner = new XmlCleaner([
     XmlCleaner::OPTION_DECODE => [ ['&', '&amp;'] ],
     XmlCleaner::OPTION_DELETE_DOCTYPE => true,
     XmlCleaner::OPTION_DELETE_PARASITIC => true
 ]);
 
 # Load the file
-$oCleaner->loadFile('path/filename.xml');
+$cleaner->loadFile('path/filename.xml');
 
 # OR Load the string content
-$oCleaner->loadString('<?xml ... ?><article>some_text</article> ... ');
+$cleaner->loadString('<?xml ... ?><article>some_text</article> ... ');
 
 # Clean the file
-$oCleaner->clean();
+$cleaner->clean();
 
 # Get the content
-$sXmlCleanedContent = $oCleaner->get();
+$xmlCleanedContent = $cleaner->get();
 
 # You can chain
-$sXmlCleanedContent = (new XmlCleaner)->loadFile('path/filename.xml')->clean()->get();
+$xmlCleanedContent = (new XmlCleaner)->loadFile('path/filename.xml')->clean()->get();
 ```
 XmlToArray
 ```php
@@ -51,23 +51,23 @@ XmlToArray
 use \Coercive\Utility\Xml\XmlToArray;
 
 # Load ToArray converter
-$oToArray = new XmlToArray($sXmlCleanedContent);
+$toArray = new XmlToArray($xmlCleanedContent);
 
 # You can add some options
-$oToArray = new XmlToArray($sXmlCleanedContent, [
+$toArray = new XmlToArray($xmlCleanedContent, [
     XmlToArray::XML_OPTION_CASE_FOLDING => 0,
     XmlToArray::XML_OPTION_SKIP_WHITE => 0,
     XmlToArray::XML_OPTION_TARGET_ENCODING => 'UTF-8'
 ]);
 
 # Parse to array when you're ready
-$oToArray->parse();
+$toArray->parse();
 
 # Get the array content
-$aXml = $oToArray->get();
+$xml = $toArray->get();
 
 # You can chain
-$aXml = (new XmlToArray($sXmlCleanedContent))->parse()->get();
+$xml = (new XmlToArray($xmlCleanedContent))->parse()->get();
 ```
 ExtractArray
 ```php
@@ -77,27 +77,30 @@ ExtractArray
 use \Coercive\Utility\Xml\ExtractArray;
 
 # Load array extractor
-$oExtractArray = new ExtractArray($aXml);
+$extractArray = new ExtractArray($xml);
 
 # You can add some options
-$oExtractArray = new ExtractArray($aXml, [
+$extractArray = new ExtractArray($xml, [
     self::ROOT => '/example/subexample',
     self::ROOT_DELIMITER => '/',
     self::ROOT_REQUIRED => false
 ]);
+$extractArray->setRoot('/example/subexample');
+$extractArray->setDelimiter('/');
+$extractArray->setRequired(false);
 
 # Get your content (destructive array system)
-$aTitle = $oExtractArray->get('title');
-$aAuthors = $oExtractArray->get('authors');
-$aArticle = $oExtractArray->get(); /* take all others */
+$title = $extractArray->get('title');
+$authors = $extractArray->get('authors');
+$article = $extractArray->get(); /* take all others */
 
 # You have two extraction options :
 
 # Get all elements
-$aListAll = $oExtractArray->get('example', true);
+$listAll = $extractArray->get('example', true);
 
 # Get all elements at the foreground of setted root
-$aListAllForeground = $oExtractArray->get('example', true, true); 
+$listAllForeground = $extractArray->get('example', true, true); 
 
 ```
 FormatML
@@ -108,15 +111,15 @@ FormatML
 use \Coercive\Utility\Xml\FormatML;
 
 # Load ML Format
-$oFormatML = new FormatML($aTitle);
+$formatML = new FormatML($aTitle);
 
 # You can add some format options
-$oFormatML = new FormatML($aTitle, [
+$formatML = new FormatML($aTitle, [
     'bold' => '<b>' . FormatML::CONTENT . '</b>',
     'italic' => '<i>' . FormatML::CONTENT . '</i>',
-    'link-www' => function($sContent, $aAttributes) {
-        $sCible = isset($aAttributes['cible']) ? $aAttributes['cible'] : '#';
-        return '<a href="'.$sCible.'">' . $sContent . '</a>';
+    'link-www' => function($content, $attributes) {
+        $target = $attributes['cible'] ?? '#';
+        return '<a href="'.$target.'">' . $content . '</a>';
     }
 ], [
     FormatML::OPTION_ALL_TAGS_REQUIRED => false,
@@ -124,5 +127,5 @@ $oFormatML = new FormatML($aTitle, [
 ]);
 
 # Retrieve formated content
-$sFormatedTitle = $oFormatML->get();
+$formatedTitle = $formatML->get();
 ```
