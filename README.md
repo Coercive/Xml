@@ -112,9 +112,13 @@ $formatML = new FormatML($aTitle);
 $formatML = new FormatML($aTitle, [
     'bold' => '<b>' . FormatML::CONTENT . '</b>',
     'italic' => '<i>' . FormatML::CONTENT . '</i>',
-    'link-www' => function($content, $attributes) {
+    'link-www' => function($content, $attributes, $parents) {
+        $color = 'blue';
+        if(in_array('quote', $parents)) {
+            $color = 'red';
+        }
         $target = $attributes['cible'] ?? '#';
-        return '<a href="'.$target.'">' . $content . '</a>';
+        return '<a style="color: '.$color.';" href="'.$target.'">' . $content . '</a>';
     }
 ], [
     FormatML::OPTION_ALL_TAGS_REQUIRED => false,
