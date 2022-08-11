@@ -104,6 +104,19 @@ class XmlCleaner
 	}
 
 	/**
+	 * XML header
+	 *
+	 * @param string $version [optional]
+	 * @param string $encoding [optional]
+	 * @return $this
+	 */
+	public function addHeader(string $version = '1.0', string $encoding = 'UTF-8', string $standalone = 'no'): XmlCleaner
+	{
+		$this->xml = '<?xml version="' . $version .'" encoding="' . $encoding . '" standalone="' . $standalone . '"?>' . $this->xml;
+		return $this;
+	}
+
+	/**
 	 * CLEAN
 	 *
 	 * @return XmlCleaner
